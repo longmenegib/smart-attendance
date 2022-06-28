@@ -150,8 +150,8 @@ class Attendance:
         delete_btn= Button(btn_frame, width=16, text="Update", bg='gold', font=("time new roman", 13, 'bold'))
         delete_btn.grid(row=0, column=2)
 
-            #Reset btn
-        reset_btn= Button(btn_frame, width=16, text="Reset", bg='gold', font=("time new roman", 13, 'bold'))
+        #Reset btn
+        reset_btn= Button(btn_frame, command=self.reset_data, width=16, text="Reset", bg='gold', font=("time new roman", 13, 'bold'))
         reset_btn.grid(row=0, column=3)
         
 
@@ -194,7 +194,22 @@ class Attendance:
         self.employee_table.column('status', width=100)
 
         self.employee_table.pack(fill=BOTH, expand=1)
+        self.employee_table.bind("<ButtonRelease>", self.get_cursor)
 
+
+    def get_cursor(self, event=""):
+        cursor_focus=self.employee_table.focus()
+        content=self.employee_table.item(cursor_focus)
+        data=content["values"]
+
+        print(data)
+
+        self.var_id.set(data[0])
+        self.var_name.set(data[1])
+        self.var_title.set(data[2])
+        self.var_time.set(data[3])
+        self.var_status.set(data[5])
+        self.var_date.set(data[4])
         
 
     def fetchData(self, rows):
@@ -205,6 +220,7 @@ class Attendance:
 
     def importCsv(self):
         global mydata
+        mydata.clear()
         fin=filedialog.askopenfilename(initialdir=os.getcwd(),title="Open CSV", filetypes=(("CSV file", "*csv"),("All File","*.*")),parent=self.root)
         with open(fin) as myfile:
             csvread = csv.reader(myfile, delimiter=",")
@@ -218,15 +234,26 @@ class Attendance:
             if len(mydata) < 1:
                 messagebox.showerror("No data", "Cannot export empty data")
                 return False
-            fin=filedialog.askopenfilename(initialdir=os.getcwd(),title="Open CSV", filetypes=(("CSV file", "*csv"),("All File","*.*")),parent=self.root)
+            fin=filedialog.asksaveasfilename(initialdir=os.getcwd(),title="Open CSV", filetypes=(("CSV file", "*csv"),("All File","*.*")),parent=self.root)
             with open(fin, mode="w", newline="") as myfile:
                 exp = csv.writer(myfile, delimiter=",")
                 for i in mydata:
-                    exp.append(i)
+                    exp.writerow(i)
                 messagebox.showinfo("Export", "Your attendance has been exported to "+ os.path.basename(fin)+"successfully")
 
         except Exception as err:
             messagebox.showerror("Error exporting", f"Due to :{str(err)}",parent=self.root)
+
+    def reset_data(self):
+        self.var_id.set("")
+        self.var_name.set("")
+        self.var_title.set("")
+        self.var_time.set("")
+        self.var_status.set("Select")
+        self.var_date.set("")
+
+
+
 
 if __name__ == "__main__":
     root=Tk()

@@ -1,6 +1,8 @@
 from binascii import b2a_base64
 from tkinter import *
 from tkinter import ttk
+from tkinter import messagebox
+# import tkinter
 from PIL import Image, ImageTk
 import os
 
@@ -129,7 +131,7 @@ class Face_Recognition_System:
         img11=img11.resize((200, 200), Image.ANTIALIAS)
         self.photoimg11 = ImageTk.PhotoImage(img11)
 
-        b8 = Button(bg_img, image=self.photoimg11, cursor="hand2")
+        b8 = Button(bg_img, command=self.iExit, image=self.photoimg11, cursor="hand2")
         b8.place(x=950, y=350, width=200, height=200)
         lb1 = Button(bg_img, text="Exit", cursor="hand2", font=("time new roman", 15, 'bold'), bg="gold", fg="red")
         lb1.place(x=950, y=520, width=200, height=40)
@@ -156,7 +158,12 @@ class Face_Recognition_System:
         self.app = Attendance(self.new_window)
 
 
-
+    def iExit(self):
+        self.iExit = messagebox.askyesno("Face Recognition", "Do you want to exit this app")
+        if(self.iExit>0):
+            self.root.destroy()
+        else:
+            return False
 
 
 
