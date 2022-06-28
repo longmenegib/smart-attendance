@@ -6,6 +6,8 @@ import os
 
 from employee import Employee
 from train import Train
+from face_recognition import Face_Recognition
+from attendance import Attendance
 
 class Face_Recognition_System:
     def __init__(self, root):
@@ -67,7 +69,7 @@ class Face_Recognition_System:
         img5=img5.resize((200, 200), Image.ANTIALIAS)
         self.photoimg5 = ImageTk.PhotoImage(img5)
 
-        b2 = Button(bg_img, image=self.photoimg5, cursor="hand2")
+        b2 = Button(bg_img, image=self.photoimg5, cursor="hand2", command=self.face_data)
         b2.place(x=450, y=100, width=200, height=200)
         lb1 = Button(bg_img, text="Face Detection", cursor="hand2", font=("time new roman", 15, 'bold'), bg="gold", fg="red")
         lb1.place(x=450, y=270, width=200, height=40)
@@ -77,7 +79,7 @@ class Face_Recognition_System:
         img6=img6.resize((200, 200), Image.ANTIALIAS)
         self.photoimg6 = ImageTk.PhotoImage(img6)
 
-        b3 = Button(bg_img, image=self.photoimg6, cursor="hand2")
+        b3 = Button(bg_img, command=self.attendance, image=self.photoimg6, cursor="hand2")
         b3.place(x=700, y=100, width=200, height=200)
         lb1 = Button(bg_img, text="Attendance", cursor="hand2", font=("time new roman", 15, 'bold'), bg="gold", fg="red")
         lb1.place(x=700, y=270, width=200, height=40)
@@ -144,6 +146,14 @@ class Face_Recognition_System:
     def train(self):
         self.new_window=Toplevel(self.root)
         self.app = Train(self.new_window)
+
+    def face_data(self):
+        self.new_window=Toplevel(self.root)
+        self.app = Face_Recognition(self.new_window)
+
+    def attendance(self):
+        self.new_window=Toplevel(self.root)
+        self.app = Attendance(self.new_window)
 
 
 

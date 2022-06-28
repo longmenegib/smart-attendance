@@ -61,7 +61,7 @@ class Train:
         #trrain the classifier and save
         clf=cv2.face.LBPHFaceRecognizer_create()
         clf.train(faces,ids)
-        clf.write("classifer.xml")
+        clf.write("classifier.xml")
         cv2.destroyAllWindows()
         
         print(ids)

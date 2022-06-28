@@ -5,6 +5,11 @@ from tkinter import messagebox
 import cv2
 import mysql.connector
 
+import imutils
+import requests
+
+url = "http://192.168.43.167:8080"
+
 
 class Employee:
   def __init__(self, root):
@@ -108,7 +113,7 @@ class Employee:
       employeeid_label= Label(employee_infos, text="EmployeeID", bg='white', font=("time new roman", 13, 'bold'))
       employeeid_label.grid(row=0, column=0, padx=10, pady=5, sticky=W)
 
-      employeeid_entry = ttk.Entry(employee_infos, textvariable= self.var_id, width=20, font=("times new roman", 13, 'bold'))
+      employeeid_entry = ttk.Entry(employee_infos, state= DISABLED, textvariable= self.var_id, width=20, font=("times new roman", 13, 'bold'))
       employeeid_entry.grid(row=0, column=1, padx=10, pady=5, sticky=W)
 
         #employee name
@@ -296,14 +301,14 @@ class Employee:
 
   #function declaration to add employee information
   def add_data(self):
-      if self.var_gender.get()=="Select" or self.var_status.get()=="Select" or self.var_address.get()=="" or self.var_name.get()=="" or self.var_title.get()=="" or self.var_year.get()=="" or self.var_email.get()=="" or self.var_phone.get()=="" or self.var_dob.get()=="" or self.var_id.get()=="":
+      if self.var_gender.get()=="Select" or self.var_status.get()=="Select" or self.var_address.get()=="" or self.var_name.get()=="" or self.var_title.get()=="" or self.var_year.get()=="" or self.var_email.get()=="" or self.var_phone.get()=="" or self.var_dob.get()=="":
         messagebox.showerror("Error", "All fields are required", parent=self.root)
       else:
         try:
           conn=mysql.connector.connect(host="localhost", username="root", password="680gib@#L", database="face_recognizer")
           my_cursor=conn.cursor()
-          my_cursor.execute("insert into employee values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", (
-            self.var_id.get(),
+          my_cursor.execute("insert into employee(name, title,year, status,address, email,phone,dob,gender,photoSample) values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", (
+            # self.var_id.get(),
             self.var_name.get(),
             self.var_title.get(),
             self.var_year.get(),
@@ -439,6 +444,9 @@ class Employee:
         my_cursor.execute("select * from employee")
         myresult=my_cursor.fetchall()
         id=0
+        print(self.var_id.get())
+        employeeid = self.var_id.get()
+        # return
         for x in myresult:
           id+=1
         my_cursor.execute("update employee set name=%s, title=%s, year=%s, status=%s, address=%s, email=%s, phone=%s, dob=%s, gender=%s, photoSample=%s where id=%s", (
@@ -474,15 +482,17 @@ class Employee:
             face_cropped=img[y:y+h, x:x+w]
             return face_cropped
 
-        cap=cv2.VideoCapture(0)
+        cap=cv2.VideoCapture(url+'/video')
         img_id=0
         while True:
           ret, my_frame=cap.read()
+          
           if face_cropped(my_frame) is not None:
             img_id+=1
             face=cv2.resize(face_cropped(my_frame), (450,450))
             face=cv2.cvtColor(face, cv2.COLOR_BGR2GRAY)
-            file_name_path="data/user."+str(id)+"."+str(img_id)+".jpg"
+            # print(self.var_id.get())
+            file_name_path="data/user."+str(employeeid)+"."+str(img_id)+".jpg"
 
             cv2.imwrite(file_name_path, face)
             cv2.putText(face, str(img_id), (50,50), cv2.FONT_HERSHEY_COMPLEX,2,(0,255,255),2)
@@ -497,7 +507,6 @@ class Employee:
       except Exception as er:
         messagebox.showerror("Error", f"Due to : {str(er)}", parent=self.root)
 
-    
 if __name__ == "__main__":
     root=Tk()
     obj = Employee(root)
