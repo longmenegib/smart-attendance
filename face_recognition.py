@@ -63,7 +63,7 @@ class Face_Recognition:
     
     #=========face dection recognition=======================
     def face_recog(self):
-        def draw_boundray(img,classifier,scaleFactor,minNeighbors,color,text,clf):
+        def draw_boundray(img,classifier, eye_cascade, first_read,scaleFactor,minNeighbors,color,text,clf):
             gray_image=cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
             features=classifier.detectMultiScale(gray_image,scaleFactor,minNeighbors)
 
@@ -74,19 +74,46 @@ class Face_Recognition:
                 id,predict=clf.predict(gray_image[y:y+h,x:x+w])
                 confidence=int((100*(1-predict/300)))
 
-               
+                #roi_face is face which is input to eye classifier
+                roi_face = gray_image[y:y+h,x:x+w]
+                roi_face_clr = img[y:y+h,x:x+w]
+                eyes = eye_cascade.detectMultiScale(roi_face,1.3,5,minSize=(50,50))
+
+                 #Examining the length of eyes object for eyes
+                if(len(eyes)>=2):
+                    #Check if program is running for detection
+                    if(first_read):
+                        cv2.putText(img,
+                        "Eye detected press s to begin",
+                        (70,70), 
+                        cv2.FONT_HERSHEY_PLAIN, 3,
+                        (0,255,0),2)
+                    else:
+                        cv2.putText(img,
+                        "Eyes open!", (70,70),
+                        cv2.FONT_HERSHEY_PLAIN, 2,
+                        (255,255,255),2)
+                else:
+                    if(first_read):
+                        #To ensure if the eyes are present before starting
+                        cv2.putText(img,
+                        "No eyes detected", (70,70),
+                        cv2.FONT_HERSHEY_PLAIN, 3,
+                        (0,0,255),2)
+                    else:
+                        #This will print on console and restart the algorithm
+                        print("Blink detected--------------")
+                        cv2.waitKey(3000)
+                        first_read=True
+
+                return False
+
 
                 conn=mysql.connector.connect(host="localhost", username="root", password="680gib@#L", database="face_recognizer")
                 my_cursor=conn.cursor()
-
-
                 my_cursor.execute("select name from employee where id="+str(id))
                 n=my_cursor.fetchone()
                 n="+".join(n)
-
-                # my_cursor.execute("select id from employee where id="+str(id))
-                # r=my_cursor.fetchone()
-                # r="+".join(str(r))
 
                 my_cursor.execute("select title from employee where id="+str(id))
                 d=my_cursor.fetchone()
@@ -106,20 +133,26 @@ class Face_Recognition:
 
             return coord
         
-        def recognize(img,clf,faceCascade):
-            coord=draw_boundray(img,faceCascade,1.1,10,(255,25,255),"Face",clf)
+        def recognize(img,clf,faceCascade, eye_cascade, first_read):
+            coord=draw_boundray(img,faceCascade, eye_cascade, first_read,1.1,10,(255,25,255),"Face",clf)
             return img
 
         faceCascade=cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
+        eye_cascade = cv2.CascadeClassifier('haarcascade_eye_tree_eyeglasses.xml')
+
         clf=cv2.face.LBPHFaceRecognizer_create()
         clf.read("classifier.xml")
+
+        #=======
+        first_read = True
 
         # video_cap=cv2.VideoCapture(url+'/video')
         video_cap=cv2.VideoCapture(0)
         
         while True:
             ret,img=video_cap.read()
-            img=recognize(img,clf,faceCascade)
+            
+            img=recognize(img,clf,faceCascade, eye_cascade, first_read)
             cv2.imshow("welcome To face Recognition",img)
 
             # img_resp = requests.get(url+'/shot.jpg')
